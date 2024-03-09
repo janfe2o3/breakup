@@ -1,0 +1,12 @@
+{
+"simulation":{
+  "minimalCharacteristicLength": 0.01,
+  "mass": 839.0,
+  "simulationType": "EXPLOSION",
+  "inputSource": ["../example-config/data_explosion.yaml"],
+  "idFilter": [7946],
+  "position": [0,0,0],
+  "velocity": [0,0,0]},
+"inputOutput": "nimbus6_input.csv",
+"resultOutput":"nimbus6_result.csv"
+}
