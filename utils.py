@@ -41,7 +41,6 @@ def mu_2(sat_type, log_lc):
 
 def sigma_2(sat_type, log_lc):
     if sat_type == "ROCKET_BODY":
-        print(log_lc)
         return distribution_constant(log_lc, -1.0, 0.1, 0.28, 0.1,
                                      lambda log_lc: 0.28 - 0.1636 * (log_lc + 1.0))
     else:

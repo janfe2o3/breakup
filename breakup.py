@@ -26,14 +26,11 @@ def calculateCharacteristicLengthFromMass(mass):
 
 def calculate_area_mass_ratio(characteristic_length, sat_type="ROCKET_BODY"):
     log_lc = np.log10(characteristic_length)
-    print(sat_type)
 
     if characteristic_length > 0.11:
             # Case bigger than 11 cm
             n1 = np.random.normal(mu_1(sat_type, log_lc), sigma_1(sat_type, log_lc))
-            print(mu_2(sat_type, log_lc),sigma_2(sat_type, log_lc))
             n2 = np.random.normal(mu_2(sat_type, log_lc), sigma_2(sat_type, log_lc))
-            print(n2,"\n")
             return np.power(10.0, alpha(sat_type, log_lc) * n1 +
                             (1 - alpha(sat_type, log_lc)) * n2)
     elif characteristic_length < 0.08:
@@ -77,27 +74,26 @@ def calculate_area(characteristic_length):
         factor_big = 0.556945
         return factor_big * characteristic_length ** exponent_big
 
-import numpy as np
-from numpy import log10
-from scipy.stats import norm
+
 
 # Assuming the necessary class attributes and methods are defined elsewhere in the class
 
-def delta_velocity_distribution(vel_x, vel_y, vel_z,a_m):
-    for vel in [vel_x, vel_y, vel_z]:
-        # Calculate velocity as a scalar based on Equation 11/12
-        chi = np.log10(a_m)
-        mu = delta_velocity_factor_offset[0] * chi + delta_velocity_factor_offset[1]
-        sigma = 0.4
-        velocity_scalar = 10 ** np.random.normal(mu, sigma)
+def delta_velocity_distribution(df, delta_velocity_factor_offset=(0.2, 1.85)):
+    vel_x= df["vel_x"]
+    vel_y= df["vel_y"]
+    vel_z= df["vel_z"]
+    a_m= df["A/M"]
+    chi = np.log10(a_m)
+    mu = delta_velocity_factor_offset[0] * chi + delta_velocity_factor_offset[1]
+    sigma = 0.4
+    velocity_scalar = 10 ** np.random.normal(mu, sigma)
 
-        ejection_velocity_vector = calculate_velocity_vector(velocity_scalar)
+    ejection_velocity_vector = calculate_velocity_vector(velocity_scalar)
+    return ejection_velocity_vector
 
-        # Update the velocity and ejection_velocity in the tuple
-        # Since tuples are immutable, you might actually be working with a list or need to create a new tuple
-        new_velocity = velocity + ejection_velocity_vector
-        # Depending on how you need to update this, you might reassign it back to your data structure
-        
-        # Example of updating the tuple, assuming you're actually using a mutable structure like a list
-        tuple[1], tuple[2] = new_velocity, ejection_velocity_vector
+def calculate_velocity_vector(velocity):
+    u = np.random.uniform(0.0, 1.0) * 2.0 - 1.0
+    theta = np.random.uniform(0.0, 1.0) * 2.0 * np.pi
+    v = np.sqrt(1.0 - u * u)
 
+    return np.array([v * np.cos(theta) * velocity, v * np.sin(theta) * velocity, u * velocity])
