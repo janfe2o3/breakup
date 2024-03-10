@@ -89,42 +89,41 @@ def main(config_path):
             self.ax.set_ylim([-70, 70])
             self.ax.set_zlim([-70, 50])
             self.df[['pos_x', 'pos_y', 'pos_z']] = self.df[['pos_x', 'pos_y', 'pos_z']].astype(float)
+
         def update_position_velocity(self, dt):
-            for index, fragment in self.df.iterrows():
-                A = fragment['area']  # Cross-sectional area
-                v = np.array([fragment['vel_x'], fragment['vel_y'], fragment['vel_z']])
-                v_mag = np.linalg.norm(v)
-
-                if v_mag > 0:
-                    # Component-wise drag calculation
-                    drag_coefficient = -0.5 * rho * Cd * A
-                    Fd_x = drag_coefficient * v[0]**2 * np.sign(v[0])
-                    Fd_y = drag_coefficient * v[1]**2 * np.sign(v[1])
-                    Fd_z = drag_coefficient * v[2]**2 * np.sign(v[2])
-
-                    Fd = np.array([Fd_x, Fd_y, Fd_z])  # Total drag force vector
-                else:
-                    Fd = np.array([0, 0, 0])  # No drag if there's no velocity
-
-                Fg = np.array([0, 0, -fragment['mass'] * g])  # Gravitational force
-                Fnet = Fd + Fg  # Net force on the fragment
-
-                a = Fnet / fragment['mass']  # Acceleration due to net force
-                # Update velocity
-                self.df.loc[index, ['vel_x', 'vel_y', 'vel_z']] = v + a * dt
-                self.list1.append((v + a * dt)[0])
-                if np.linalg.norm(v + a * dt)>10000:
-                    print(v + a * dt)
-                    print(fragment)
-                    plt.close()
-                    plt.plot(self.list1)
-                    plt.savefig("debug.png")
-                    exit()
-                
-                #print(fragment)
-                # Update position
-                self.df.loc[index, ['pos_x', 'pos_y', 'pos_z']] = np.array([fragment['pos_x'], fragment['pos_y'], fragment['pos_z']]) + v * dt + 0.5 * a * dt**2
-                        
+            # Extract velocity components and compute magnitude
+            velocities = self.df[['vel_x', 'vel_y', 'vel_z']].values
+            v_mags = np.linalg.norm(velocities, axis=1)
+            
+            # Precompute gravitational force for all fragments
+            Fg = np.array([0, 0, -g]) * self.df['mass'].values[:, np.newaxis]
+            
+            # Initialize drag force array
+            Fd = np.zeros_like(velocities)
+            
+            # Calculate drag force only for fragments with non-zero velocity
+            non_zero_vel = v_mags > 0
+            A = self.df.loc[non_zero_vel, 'area'].values
+            drag_coefficient = -0.5 * rho * Cd * A
+            Fd_x = drag_coefficient * velocities[non_zero_vel, 0]**2 * np.sign(velocities[non_zero_vel, 0])
+            Fd_y = drag_coefficient * velocities[non_zero_vel, 1]**2 * np.sign(velocities[non_zero_vel, 1])
+            Fd_z = drag_coefficient * velocities[non_zero_vel, 2]**2 * np.sign(velocities[non_zero_vel, 2])
+            Fd[non_zero_vel] = np.vstack((Fd_x, Fd_y, Fd_z)).T
+            
+            # Calculate net force
+            Fnet = Fd + Fg
+            
+            # Calculate acceleration
+            a = Fnet / self.df['mass'].values[:, np.newaxis]
+            
+            # Update velocity
+            new_velocities = velocities + a * dt
+            self.df[['vel_x', 'vel_y', 'vel_z']] = new_velocities
+            
+            # Update position
+            new_positions = self.df[['pos_x', 'pos_y', 'pos_z']].values + velocities * dt + 0.5 * a * dt**2
+            self.df[['pos_x', 'pos_y', 'pos_z']] = new_positions
+                            
         def init(self):
             for line in self.lines:
                 line.set_data([], [])
@@ -157,7 +156,7 @@ def main(config_path):
     ani = simulation.run()
 
     # Save the animation
-    ani.save('debris_trajectories.mp4', writer='ffmpeg', fps=1000)
+    ani.save('debris_trajectories2.mp4', writer='ffmpeg', fps=1000)
     print(max(abs(df["pos_x"])))
 if __name__=="__main__":
     main("config.json")
