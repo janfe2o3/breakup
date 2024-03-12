@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from utils import mu_1, sigma_1, mu_2, sigma_2, mu_soc, sigma_soc, alpha
 
-import random
 
 def calculate_fragment_count(L_c):
     n= int(6*L_c**(-1.6))
@@ -76,12 +75,7 @@ def calculate_area(characteristic_length):
 
 
 
-# Assuming the necessary class attributes and methods are defined elsewhere in the class
-
 def delta_velocity_distribution(df, delta_velocity_factor_offset=(0.2, 1.85)):
-    vel_x= df["vel_x"]
-    vel_y= df["vel_y"]
-    vel_z= df["vel_z"]
     a_m= df["A/M"]
     chi = np.log10(a_m)
     mu = delta_velocity_factor_offset[0] * chi + delta_velocity_factor_offset[1]

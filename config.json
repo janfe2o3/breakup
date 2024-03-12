@@ -1,6 +1,6 @@
 {
 "simulation":{
-  "minimalCharacteristicLength": 0.1,
+  "minimalCharacteristicLength": 0.6,
   "mass": 839.0,
   "simulationType": "EXPLOSION",
   "inputSource": ["../example-config/data_explosion.yaml"],
