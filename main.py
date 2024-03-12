@@ -63,7 +63,7 @@ def main(config_path):
     plt.ylabel('Y Velocity')
     plt.title('Velocity Vectors')
     plt.gca().set_aspect('equal', adjustable='box')
-    plt.savefig("speeds.png")
+    plt.savefig("result/speeds.png")
     plt.close()
 
     df.to_excel("result/df.xlsx")
